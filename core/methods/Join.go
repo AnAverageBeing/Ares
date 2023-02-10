@@ -29,22 +29,25 @@ func (j Join) Start() {
 	}
 	j.handshakePacket = mcutils.GetHandshakePacket(ip, iport, j.Config.Version, mcutils.Login)
 	j.isRunnig = true
+	done := make(chan struct{})
 	for i := 0; i < j.Config.Loops; i++ {
-		loop(&j)
+		loop(&j, done)
 	}
 }
 
-func loop(j *Join) {
+func loop(j *Join, done chan struct{}) {
 	ticker := time.NewTicker(j.Config.Delay)
-	for j.isRunnig {
+	defer ticker.Stop()
+	for {
 		select {
 		case <-ticker.C:
 			for i := 0; i < j.Config.PerDelay; i++ {
 				go connect(j)
 			}
+		case <-done:
+			return
 		}
 	}
-	ticker.Stop()
 }
 
 func connect(j *Join) error {
