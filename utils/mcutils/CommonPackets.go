@@ -38,7 +38,6 @@ func GetLoginPacket(name *string, versionProtocol int) packet.Packet {
 			0x00,
 			packet.String(*name),
 			packet.Boolean(false),
-			packet.UUID{},
 		)
 		return pk
 	}
