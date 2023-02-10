@@ -32,6 +32,7 @@ func GetLoginPacket(name string, versionProtocol int) (pk packet.Packet) {
 			packet.Boolean(false),
 			packet.Boolean(false),
 		)
+		fmt.Println("WOW")
 		return
 	}
 
@@ -50,6 +51,7 @@ func GetLoginPacket(name string, versionProtocol int) (pk packet.Packet) {
 		0x00,
 		packet.String(name),
 	)
+	fmt.Println("XD")
 
 	return
 }
