@@ -51,19 +51,20 @@ func (j Join) loop(done chan struct{}) {
 }
 
 func (j Join) connect() error {
-	conn, err := minecraft.DialMc(j.Config.Host, j.Config.ProxyManager.GetNext())
+	prox := j.Config.ProxyManager.GetNext()
+	conn, err := minecraft.DialMc(j.Config.Host, prox)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, " ", prox)
 		return err
 	}
 	err = conn.WritePacket(j.handshakePacket)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, " ", prox)
 		return err
 	}
 	err = conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(16), j.Config.Version))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err, " ", prox)
 		return err
 	}
 	return nil
