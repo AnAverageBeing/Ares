@@ -38,7 +38,7 @@ func (j *Join) Start() {
 	done := make(chan struct{})
 
 	for i := 0; i < j.Config.Loops; i++ {
-		go j.loop(done)
+		j.loop(done)
 	}
 }
 
@@ -48,7 +48,7 @@ func (j *Join) loop(done chan struct{}) {
 		select {
 		case <-ticker.C:
 			for i := 0; i < j.Config.PerDelay; i++ {
-				go j.connect()
+				j.connect()
 			}
 		case <-done:
 			return
@@ -61,15 +61,8 @@ func (j *Join) connect() {
 	if err != nil {
 		return
 	}
-	err = conn.WritePacket(j.handshakePacket)
-	if err != nil {
-		return
-	}
-	joinpacket := mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version)
-	err = conn.WritePacket(joinpacket)
-	if err != nil {
-		return
-	}
+	conn.WritePacket(j.handshakePacket)
+	conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version))
 }
 
 func (j *Join) Stop() {
