@@ -13,7 +13,7 @@ import (
 
 type Ping struct {
 	Config          *core.AttackConfig
-	isRunnig        bool
+	isRunning       bool
 	handshakePacket packet.Packet
 }
 
@@ -30,17 +30,27 @@ func (p *Ping) Start() {
 
 	p.handshakePacket = mcutils.GetHandshakePacket(ip, iport, p.Config.Version, mcutils.Status)
 
-	p.isRunnig = true
+	p.isRunning = true
+
+	done := make(chan struct{})
 
 	for i := 0; i < p.Config.Loops; i++ {
-		go func() {
-			for p.isRunnig {
-				for i := 0; i < p.Config.PerDelay; i++ {
-					go p.connect()
-				}
-				time.Sleep(p.Config.Delay)
+		p.loop(done)
+	}
+}
+
+func (p *Ping) loop(done chan struct{}) {
+	ticker := time.NewTicker(p.Config.Delay)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			for i := 0; i < p.Config.PerDelay; i++ {
+				p.connect()
 			}
-		}()
+		case <-done:
+			return
+		}
 	}
 }
 

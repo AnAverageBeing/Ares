@@ -35,15 +35,25 @@ func (j *Join) Start() {
 
 	j.isRunning = true
 
+	done := make(chan struct{})
+
 	for i := 0; i < j.Config.Loops; i++ {
-		go func() {
-			for j.isRunning {
-				for i := 0; i < j.Config.PerDelay; i++ {
-					go j.connect()
-				}
-				time.Sleep(j.Config.Delay)
+		j.loop(done)
+	}
+}
+
+func (j *Join) loop(done chan struct{}) {
+	ticker := time.NewTicker(j.Config.Delay)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			for i := 0; i < j.Config.PerDelay; i++ {
+				j.connect()
 			}
-		}()
+		case <-done:
+			return
+		}
 	}
 }
 
