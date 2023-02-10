@@ -36,16 +36,14 @@ func (j *Join) Start() {
 	j.isRunning = true
 
 	for i := 0; i < j.Config.Loops; i++ {
-		j.loop()
-	}
-}
-
-func (j *Join) loop() {
-	for j.isRunning {
-		for i := 0; i < j.Config.PerDelay; i++ {
-			go j.connect()
-		}
-		time.Sleep(j.Config.Delay)
+		go func() {
+			for j.isRunning {
+				for i := 0; i < j.Config.PerDelay; i++ {
+					go j.connect()
+				}
+				time.Sleep(j.Config.Delay)
+			}
+		}()
 	}
 }
 

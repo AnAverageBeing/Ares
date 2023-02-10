@@ -33,16 +33,14 @@ func (p *Ping) Start() {
 	p.isRunnig = true
 
 	for i := 0; i < p.Config.Loops; i++ {
-		p.loop()
-	}
-}
-
-func (p *Ping) loop() {
-	for p.isRunnig {
-		for i := 0; i < p.Config.PerDelay; i++ {
-			go p.connect()
-		}
-		time.Sleep(p.Config.Delay)
+		go func() {
+			for p.isRunnig {
+				for i := 0; i < p.Config.PerDelay; i++ {
+					go p.connect()
+				}
+				time.Sleep(p.Config.Delay)
+			}
+		}()
 	}
 }
 
