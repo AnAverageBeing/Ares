@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	SOCKS4 = "socks4"
-	SOCKS5 = "socks5"
+	SOCKS4  = "socks4"
+	SOCKS5  = "socks5"
+	NOProxy = "none"
 )
 
 type Proxy struct {
@@ -37,6 +38,10 @@ func (p Proxy) Dial() func(string) (conn net.Conn, err error) {
 	case SOCKS5:
 		return func(s string) (conn net.Conn, err error) {
 			return p.dialSOCKS5(s)
+		}
+	case NOProxy:
+		return func(s string) (conn net.Conn, err error) {
+			return p.dialNOProxy(s)
 		}
 	}
 	return nil
