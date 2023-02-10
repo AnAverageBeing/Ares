@@ -43,7 +43,6 @@ var bufPool = sync.Pool{
 	},
 }
 
-// Pack 打包一个数据包
 func (p *Packet) Pack(w io.Writer, threshold int) error {
 	if threshold >= 0 {
 		return p.packWithCompression(w, threshold)

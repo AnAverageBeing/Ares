@@ -18,6 +18,7 @@ type Ping struct {
 }
 
 func (p *Ping) Start() {
+
 	ip, port, err := net.SplitHostPort(p.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -26,9 +27,13 @@ func (p *Ping) Start() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	p.handshakePacket = mcutils.GetHandshakePacket(ip, iport, p.Config.Version, mcutils.Status)
+
 	p.isRunnig = true
+
 	done := make(chan struct{})
+
 	for i := 0; i < p.Config.Loops; i++ {
 		p.loop(done)
 	}
@@ -36,7 +41,6 @@ func (p *Ping) Start() {
 
 func (p *Ping) loop(done chan struct{}) {
 	ticker := time.NewTicker(p.Config.Delay)
-	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
@@ -49,10 +53,10 @@ func (p *Ping) loop(done chan struct{}) {
 	}
 }
 
-func (p *Ping) connect() error {
+func (p *Ping) connect() {
 	conn, err := minecraft.DialMc(p.Config.Host, p.Config.ProxyManager.GetNext())
 	if err != nil {
-		return err
+		return
 	}
 
 	conn.WritePacket(p.handshakePacket)
@@ -63,7 +67,6 @@ func (p *Ping) connect() error {
 		0x01,
 		packet.Long(time.Now().Unix()),
 	))
-	return nil
 }
 
 func (p *Ping) Stop() {

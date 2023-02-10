@@ -30,9 +30,13 @@ func (j *Join) Start() {
 		fmt.Println(err)
 		return
 	}
+
 	j.handshakePacket = mcutils.GetHandshakePacket(ip, iport, j.Config.Version, mcutils.Login)
+
 	j.isRunning = true
+
 	done := make(chan struct{})
+
 	for i := 0; i < j.Config.Loops; i++ {
 		j.loop(done)
 	}
@@ -40,7 +44,6 @@ func (j *Join) Start() {
 
 func (j *Join) loop(done chan struct{}) {
 	ticker := time.NewTicker(j.Config.Delay)
-	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
@@ -53,22 +56,20 @@ func (j *Join) loop(done chan struct{}) {
 	}
 }
 
-func (j *Join) connect() error {
+func (j *Join) connect() {
 	conn, err := minecraft.DialMc(j.Config.Host, j.Config.ProxyManager.GetNext())
 	if err != nil {
-		return err
+		return
 	}
 	err = conn.WritePacket(j.handshakePacket)
 	if err != nil {
-		fmt.Println(err)
-		return err
+		return
 	}
 	joinpacket := mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version)
 	err = conn.WritePacket(joinpacket)
 	if err != nil {
-		return err
+		return
 	}
-	return err
 }
 
 func (j *Join) Stop() {
