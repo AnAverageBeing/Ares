@@ -63,7 +63,6 @@ func (p Ping) connect() error {
 		0x01,
 		packet.Long(time.Now().Unix()),
 	))
-	defer conn.Close()
 	return nil
 }
 
