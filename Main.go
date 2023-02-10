@@ -19,7 +19,7 @@ var (
 	delay    = flag.Int("delay", 1, "Delay between each connection loop")
 	perDelay = flag.Int("per", 1000, "Connections per Delay")
 	loops    = flag.Int("loops", 1, "Method loops")
-	method   = flag.String("method", "join", "Method name")
+	method   = flag.String("method", "cps", "Method name")
 	duration = flag.Int("duration", 600, "attack duration")
 )
 
