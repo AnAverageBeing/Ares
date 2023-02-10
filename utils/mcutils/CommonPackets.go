@@ -22,11 +22,11 @@ func GetHandshakePacket(ip string, port int, protocol int, nextState nextState) 
 	return pk
 }
 
-func GetLoginPacket(name *string, versionProtocol int) packet.Packet {
+func GetLoginPacket(name string, versionProtocol int) packet.Packet {
 	if versionProtocol == 760 || versionProtocol == 759 {
 		pk := packet.Marshal(
 			0x00,
-			packet.String(*name),
+			packet.String(name),
 			packet.Boolean(false),
 			packet.Boolean(false),
 		)
@@ -36,7 +36,7 @@ func GetLoginPacket(name *string, versionProtocol int) packet.Packet {
 	if versionProtocol == 761 {
 		pk := packet.Marshal(
 			0x00,
-			packet.String(*name),
+			packet.String(name),
 			packet.Boolean(false),
 		)
 		return pk
@@ -44,7 +44,7 @@ func GetLoginPacket(name *string, versionProtocol int) packet.Packet {
 
 	pk := packet.Marshal(
 		0x00,
-		packet.String(*name),
+		packet.String(name),
 	)
 
 	return pk

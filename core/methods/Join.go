@@ -63,8 +63,7 @@ func (j *Join) connect() error {
 		fmt.Println(err)
 		return err
 	}
-	var name string = utils.RandomName(10)
-	joinpacket := mcutils.GetLoginPacket(&name, j.Config.Version)
+	joinpacket := mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version)
 	err = conn.WritePacket(joinpacket)
 	if err != nil {
 		return err
