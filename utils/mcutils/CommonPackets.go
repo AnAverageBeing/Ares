@@ -1,6 +1,8 @@
 package mcutils
 
-import "Ares/net/minecraft/packet"
+import (
+	"Ares/net/minecraft/packet"
+)
 
 type nextState int
 
@@ -37,6 +39,7 @@ func GetLoginPacket(name string, versionProtocol int) (pk packet.Packet) {
 			0x00,
 			packet.String(name),
 			packet.Boolean(false),
+			packet.UUID{},
 		)
 		return
 	}
