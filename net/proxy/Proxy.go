@@ -38,7 +38,7 @@ func (p Proxy) GetString() (key string) {
 	return
 }
 
-func (p Proxy) Dial(target string) (net.Conn, error) {
+func (p Proxy) Dial(target string) (*net.Conn, error) {
 	switch p.Protocol {
 	case HTTP:
 		return p.dialHTTP(target)

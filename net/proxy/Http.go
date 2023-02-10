@@ -9,7 +9,7 @@ import (
 	"net/url"
 )
 
-func (p Proxy) dialHTTP(target string) (net.Conn, error) {
+func (p Proxy) dialHTTP(target string) (*net.Conn, error) {
 	dialer := &net.Dialer{Timeout: p.Timeout}
 	proxyURL := &url.URL{
 		Scheme: "http",
@@ -45,5 +45,5 @@ func (p Proxy) dialHTTP(target string) (net.Conn, error) {
 		}
 	}
 
-	return conn, nil
+	return &conn, nil
 }
