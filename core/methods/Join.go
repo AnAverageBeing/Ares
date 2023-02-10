@@ -44,6 +44,7 @@ func (j *Join) Start() {
 
 func (j *Join) loop(done chan struct{}) {
 	ticker := time.NewTicker(j.Config.Delay)
+	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
