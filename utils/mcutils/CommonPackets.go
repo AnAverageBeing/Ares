@@ -2,6 +2,7 @@ package mcutils
 
 import (
 	"Ares/net/minecraft/packet"
+	"fmt"
 )
 
 type nextState int
@@ -41,6 +42,7 @@ func GetLoginPacket(name string, versionProtocol int) (pk packet.Packet) {
 			packet.Boolean(false),
 			packet.UUID{},
 		)
+		fmt.Println("HMM")
 		return
 	}
 
