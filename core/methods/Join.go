@@ -31,7 +31,6 @@ func (j Join) Start() {
 	j.isRunnig = true
 	for i := 0; i < j.Config.Loops; i++ {
 		go loop(&j)
-		time.Sleep(400 * time.Millisecond)
 	}
 }
 
