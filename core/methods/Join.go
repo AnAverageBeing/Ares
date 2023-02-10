@@ -52,6 +52,7 @@ func connect(j *Join) error {
 	conn.WritePacket(j.handshakePacket)
 	conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(16), j.Config.Version))
 
+	conn.Close()
 	return nil
 }
 
