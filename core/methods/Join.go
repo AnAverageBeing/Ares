@@ -43,7 +43,7 @@ func (j *Join) Start() {
 func (j *Join) loop() {
 	for j.isRunning {
 		for i := 0; i < j.Config.PerDelay; i++ {
-			j.connect()
+			go j.connect()
 		}
 		time.Sleep(j.Config.Delay)
 	}

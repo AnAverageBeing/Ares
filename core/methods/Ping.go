@@ -40,7 +40,7 @@ func (p *Ping) Start() {
 func (p *Ping) loop() {
 	for p.isRunnig {
 		for i := 0; i < p.Config.PerDelay; i++ {
-			p.connect()
+			go p.connect()
 		}
 		time.Sleep(p.Config.Delay)
 	}
