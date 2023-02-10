@@ -46,7 +46,7 @@ func (p *Ping) loop(done chan struct{}) {
 		select {
 		case <-ticker.C:
 			for i := 0; i < p.Config.PerDelay; i++ {
-				p.connect()
+				go p.connect()
 			}
 		case <-done:
 			return

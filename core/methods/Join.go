@@ -49,7 +49,7 @@ func (j *Join) loop(done chan struct{}) {
 		select {
 		case <-ticker.C:
 			for i := 0; i < j.Config.PerDelay; i++ {
-				j.connect()
+				go j.connect()
 			}
 		case <-done:
 			return
