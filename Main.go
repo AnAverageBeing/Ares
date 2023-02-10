@@ -25,15 +25,15 @@ func main() {
 
 	manager := core.ProxyManager{}
 
-	err := utils.LoadFromFile(proxy.SOCKS4, 10*time.Second, "socks4.txt", &manager)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = utils.LoadFromFile(proxy.SOCKS5, 10*time.Second, "socks5.txt", &manager)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = utils.LoadFromFile(proxy.HTTP, 10*time.Second, "http.txt", &manager)
+	// err := utils.LoadFromFile(proxy.SOCKS4, 10*time.Second, "socks4.txt", &manager)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// err = utils.LoadFromFile(proxy.SOCKS5, 10*time.Second, "socks5.txt", &manager)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	err := utils.LoadFromFile(proxy.HTTP, 10*time.Second, "http.txt", &manager)
 	if err != nil {
 		log.Fatal(err)
 	}
