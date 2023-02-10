@@ -35,17 +35,25 @@ func (j *Join) Start() {
 
 	j.isRunning = true
 
+	done := make(chan struct{})
+
 	for i := 0; i < j.Config.Loops; i++ {
-		go j.loop()
+		j.loop(done)
 	}
 }
 
-func (j *Join) loop() {
-	for j.isRunning {
-		for i := 0; i < j.Config.PerDelay; i++ {
-			go j.connect()
+func (j *Join) loop(done chan struct{}) {
+	ticker := time.NewTicker(j.Config.Delay)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			for i := 0; i < j.Config.PerDelay; i++ {
+				go j.connect()
+			}
+		case <-done:
+			return
 		}
-		time.Sleep(j.Config.Delay)
 	}
 }
 
@@ -56,6 +64,7 @@ func (j *Join) connect() {
 	}
 	conn.WritePacket(j.handshakePacket)
 	conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version))
+	defer conn.Close()
 }
 
 func (j *Join) Stop() {
