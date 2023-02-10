@@ -54,17 +54,17 @@ func (j Join) connect() error {
 	prox := j.Config.ProxyManager.GetNext()
 	conn, err := minecraft.DialMc(j.Config.Host, prox)
 	if err != nil {
-		fmt.Println(err, " ", prox)
+		fmt.Println(err, " ", prox.Protocol)
 		return err
 	}
 	err = conn.WritePacket(j.handshakePacket)
 	if err != nil {
-		fmt.Println(err, " ", prox)
+		fmt.Println(err, " ", prox.Protocol)
 		return err
 	}
 	err = conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(16), j.Config.Version))
 	if err != nil {
-		fmt.Println(err, " ", prox)
+		fmt.Println(err, " ", prox.Protocol)
 		return err
 	}
 	return nil
