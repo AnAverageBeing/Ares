@@ -18,9 +18,7 @@ func (b *requestBuilder) add(data ...byte) {
 
 func (c *Proxy) sendReceive(conn net.Conn, req []byte) (resp []byte, err error) {
 	if c.Timeout > 0 {
-		if err := conn.SetWriteDeadline(time.Now().Add(c.Timeout)); err != nil {
-			return nil, err
-		}
+		conn.SetWriteDeadline(time.Now().Add(c.Timeout))
 	}
 	_, err = conn.Write(req)
 	if err != nil {
@@ -31,13 +29,15 @@ func (c *Proxy) sendReceive(conn net.Conn, req []byte) (resp []byte, err error) 
 }
 
 func (c *Proxy) readAll(conn net.Conn) (resp []byte, err error) {
-	resp = make([]byte, 1024)
 	if c.Timeout > 0 {
-		if err := conn.SetReadDeadline(time.Now().Add(c.Timeout)); err != nil {
-			return nil, err
-		}
+		conn.SetReadDeadline(time.Now().Add(c.Timeout))
 	}
-	n, err := conn.Read(resp)
+	var n int
+	resp = make([]byte, 1024)
+	n, err = conn.Read(resp)
+	if err != nil {
+		return nil, err
+	}
 	resp = resp[:n]
 	return
 }
@@ -48,11 +48,9 @@ func lookupIPv4(host string) (net.IP, error) {
 		return nil, err
 	}
 	for _, ip := range ips {
-		ipv4 := ip.To4()
-		if ipv4 == nil {
-			continue
+		if ip4 := ip.To4(); ip4 != nil {
+			return ip4, nil
 		}
-		return ipv4, nil
 	}
 	return nil, fmt.Errorf("no IPv4 address found for host: %s", host)
 }
@@ -66,6 +64,5 @@ func splitHostPort(addr string) (host string, port uint16, err error) {
 	if err != nil {
 		return "", 0, err
 	}
-	port = uint16(portInt)
-	return
+	return host, uint16(portInt), nil
 }

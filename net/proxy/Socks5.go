@@ -6,15 +6,14 @@ import (
 )
 
 func (p *Proxy) dialSOCKS5(target string) (net.Conn, error) {
+	username := p.Auth.Username()
+	password, _ := p.Auth.Password()
 	conn, err := net.DialTimeout("tcp", p.Host, p.Timeout)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if err != nil {
-			conn.Close()
-		}
-	}()
+
+	defer conn.Close()
 
 	var req requestBuilder
 
@@ -45,12 +44,12 @@ func (p *Proxy) dialSOCKS5(target string) (net.Conn, error) {
 		version := byte(1) // user/password version 1
 		req.Reset()
 		req.add(
-			version,                    // user/password version
-			byte(len(p.Auth.Username)), // length of username
+			version,             // user/password version
+			byte(len(username)), // length of username
 		)
-		req.add([]byte(p.Auth.Username)...)
-		req.add(byte(len(p.Auth.Password)))
-		req.add([]byte(p.Auth.Password)...)
+		req.add([]byte(username)...)
+		req.add(byte(len(password)))
+		req.add([]byte(password)...)
 		resp, err := p.sendReceive(conn, req.Bytes())
 		if err != nil {
 			return nil, err

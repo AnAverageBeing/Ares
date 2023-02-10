@@ -1,40 +1,31 @@
 package proxy
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"net/url"
 	"time"
 )
 
-type Protocol string
-
 const (
 	SOCKS4 = "socks4"
 	SOCKS5 = "socks5"
 )
 
-type (
-	Proxy struct {
-		Protocol Protocol
-		Host     string
-		Auth     *Auth
-		Timeout  time.Duration
-	}
-	Auth struct {
-		Username string
-		Password string
-	}
-)
+type Proxy struct {
+	Protocol Protocol
+	Host     string
+	Auth     *url.Userinfo
+	Timeout  time.Duration
+}
 
-func (p Proxy) GetString() (key string) {
+type Protocol string
+
+func (p Proxy) GetString() string {
 	if p.Auth != nil {
-		key = string(p.Protocol) + "://" + p.Auth.Username + ":" + p.Auth.Password + "@" + p.Host
-	} else {
-		key = string(p.Protocol) + "://" + p.Host
+		return string(p.Protocol) + "://" + p.Auth.String() + "@" + p.Host
 	}
-	return
+	return string(p.Protocol) + "://" + p.Host
 }
 
 func (p Proxy) Dial() func(string) (conn net.Conn, err error) {
@@ -60,27 +51,16 @@ func New(proxyUri string) (*Proxy, error) {
 	proxy := &Proxy{}
 
 	switch uri.Scheme {
-	case "socks4":
+	case SOCKS4:
 		proxy.Protocol = SOCKS4
-	case "socks5":
+	case SOCKS5:
 		proxy.Protocol = SOCKS5
 	default:
 		return nil, fmt.Errorf("unknown proxy protocol %s", uri.Scheme)
 	}
 
 	proxy.Host = uri.Host
-	usr := uri.User.Username()
-	passwd, _ := uri.User.Password()
-
-	if usr != "" || passwd != "" {
-		if len(usr) > 255 || len(passwd) > 255 {
-			return nil, errors.New("invalid user name or password")
-		}
-		proxy.Auth = &Auth{
-			Username: usr,
-			Password: passwd,
-		}
-	}
+	proxy.Auth = uri.User
 
 	query := uri.Query()
 

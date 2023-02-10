@@ -6,16 +6,18 @@ import (
 	"time"
 )
 
+const (
+	version    = 4
+	connect    = 1
+	respLength = 8
+)
+
 func (p *Proxy) dialSOCKS4(target string) (net.Conn, error) {
 	conn, err := net.DialTimeout("tcp", p.Host, p.Timeout)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if err != nil {
-			conn.Close()
-		}
-	}()
+	defer conn.Close()
 
 	host, port, err := splitHostPort(target)
 	if err != nil {
@@ -28,8 +30,8 @@ func (p *Proxy) dialSOCKS4(target string) (net.Conn, error) {
 	}
 
 	req := []byte{
-		4,                          // version number
-		1,                          // command CONNECT
+		version,                    // version number
+		connect,                    // command CONNECT
 		byte(port >> 8),            // higher byte of destination port
 		byte(port),                 // lower byte of destination port (big endian)
 		ip[0], ip[1], ip[2], ip[3], // special invalid IP address to indicate the host name is provided
@@ -37,16 +39,16 @@ func (p *Proxy) dialSOCKS4(target string) (net.Conn, error) {
 	}
 
 	resp, err := p.sendReceive(conn, req)
-
 	if err != nil {
 		return nil, err
-	} else if len(resp) != 8 {
+	} else if len(resp) != respLength {
 		return nil, errors.New("proxy did not respond properly")
 	}
 
 	switch resp[1] {
 	case 90:
 		// request granted
+		break
 	case 91:
 		return nil, errors.New("socks connection request rejected or failed")
 	case 92:
@@ -56,7 +58,7 @@ func (p *Proxy) dialSOCKS4(target string) (net.Conn, error) {
 	default:
 		return nil, errors.New("socks connection request failed, unknown error")
 	}
-	// clear the deadline before returning
+
 	if err := conn.SetDeadline(time.Time{}); err != nil {
 		return nil, err
 	}
