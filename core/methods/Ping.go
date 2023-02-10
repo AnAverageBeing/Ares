@@ -32,24 +32,17 @@ func (p *Ping) Start() {
 
 	p.isRunnig = true
 
-	done := make(chan struct{})
-
 	for i := 0; i < p.Config.Loops; i++ {
-		p.loop(done)
+		p.loop()
 	}
 }
 
-func (p *Ping) loop(done chan struct{}) {
-	ticker := time.NewTicker(p.Config.Delay)
-	for {
-		select {
-		case <-ticker.C:
-			for i := 0; i < p.Config.PerDelay; i++ {
-				go p.connect()
-			}
-		case <-done:
-			return
+func (p *Ping) loop() {
+	for p.isRunnig {
+		for i := 0; i < p.Config.PerDelay; i++ {
+			p.connect()
 		}
+		time.Sleep(p.Config.Delay)
 	}
 }
 
