@@ -38,17 +38,22 @@ func (p Proxy) GetString() (key string) {
 	return
 }
 
-func (p Proxy) Dial(target string) (*net.Conn, error) {
+func (p Proxy) Dial() func(string) (net.Conn, error) {
 	switch p.Protocol {
 	case HTTP:
-		return p.dialHTTP(target)
+		return func(s string) (net.Conn, error) {
+			return p.dialHTTP(s)
+		}
 	case SOCKS4:
-		return p.dialSOCKS4(target)
+		return func(s string) (net.Conn, error) {
+			return p.dialSOCKS4(s)
+		}
 	case SOCKS5:
-		return p.dialSOCKS5(target)
-	default:
-		return nil, fmt.Errorf("unknown proxy protocol %s", p.Protocol)
+		return func(s string) (net.Conn, error) {
+			return p.dialSOCKS5(s)
+		}
 	}
+	return nil
 }
 
 func New(proxyUri string) (*Proxy, error) {

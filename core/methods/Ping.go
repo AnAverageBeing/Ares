@@ -52,17 +52,30 @@ func (p Ping) loop(done chan struct{}) {
 func (p Ping) connect() error {
 	conn, err := minecraft.DialMc(p.Config.Host, p.Config.ProxyManager.GetNext())
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
-	conn.WritePacket(p.handshakePacket)
-	conn.WritePacket(packet.Marshal(
+	err = conn.WritePacket(p.handshakePacket)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = conn.WritePacket(packet.Marshal(
 		0x00,
 	))
-	conn.WritePacket(packet.Marshal(
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = conn.WritePacket(packet.Marshal(
 		0x01,
 		packet.Long(time.Now().Unix()),
 	))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 	return nil
 }
 

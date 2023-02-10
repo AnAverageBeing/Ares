@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (p Proxy) dialSOCKS4(target string) (*net.Conn, error) {
+func (p *Proxy) dialSOCKS4(target string) (net.Conn, error) {
 	conn, err := net.DialTimeout("tcp", p.Host, p.Timeout)
 	if err != nil {
 		return nil, err
@@ -60,5 +60,5 @@ func (p Proxy) dialSOCKS4(target string) (*net.Conn, error) {
 	if err := conn.SetDeadline(time.Time{}); err != nil {
 		return nil, err
 	}
-	return &conn, nil
+	return conn, nil
 }

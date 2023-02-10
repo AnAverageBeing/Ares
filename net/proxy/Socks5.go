@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func (p Proxy) dialSOCKS5(target string) (*net.Conn, error) {
+func (p *Proxy) dialSOCKS5(target string) (net.Conn, error) {
 	conn, err := net.DialTimeout("tcp", p.Host, p.Timeout)
 	if err != nil {
 		return nil, err
@@ -83,11 +83,11 @@ func (p Proxy) dialSOCKS5(target string) (*net.Conn, error) {
 	)
 	resp, err = p.sendReceive(conn, req.Bytes())
 	if err != nil {
-		return &conn, err
+		return conn, err
 	} else if len(resp) != 10 {
 		return nil, errors.New("proxy does not respond properly")
 	} else if resp[1] != 0 {
 		return nil, errors.New("can't complete SOCKS5 connection")
 	}
-	return &conn, nil
+	return conn, nil
 }

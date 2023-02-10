@@ -17,8 +17,8 @@ type Connection struct {
 }
 
 func DialMc(host string, proxy *proxy.Proxy) (connection *Connection, err error) {
-	conn, err := proxy.Dial(host)
-	connection = WrapConn(*conn)
+	conn, err := proxy.Dial()(host)
+	connection = WrapConn(conn)
 	return
 }
 

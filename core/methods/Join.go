@@ -53,11 +53,19 @@ func (j Join) loop(done chan struct{}) {
 func (j Join) connect() error {
 	conn, err := minecraft.DialMc(j.Config.Host, j.Config.ProxyManager.GetNext())
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
-
-	conn.WritePacket(j.handshakePacket)
-	conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(16), j.Config.Version))
+	err = conn.WritePacket(j.handshakePacket)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(16), j.Config.Version))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 	return nil
 }
 
