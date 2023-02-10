@@ -17,6 +17,7 @@ var (
 	perDelay = flag.Int("per", 1000, "Connections per Delay")
 	loops    = flag.Int("loops", 1, "Method loops")
 	method   = flag.String("method", "join", "Method name")
+	duration = flag.Int("duration", 600, "attack duration")
 )
 
 func main() {
@@ -46,5 +47,5 @@ func main() {
 
 	methd.Start()
 
-	time.Sleep(time.Duration(*delay) * time.Second)
+	time.Sleep(time.Duration(*duration) * time.Second)
 }
