@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"time"
 )
 
@@ -21,23 +22,29 @@ var (
 	duration = flag.Int("duration", 600, "attack duration")
 )
 
+var err error
+
 func main() {
 	flag.Parse()
 
 	manager := core.ProxyManager{}
-	err := utils.LoadFromFile(proxy.HTTP, 10*time.Second, "http.txt", &manager)
+	err = utils.LoadFromFile(proxy.HTTP, 10*time.Second, "http.txt", &manager)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	err = utils.LoadFromFile(proxy.SOCKS4, 10*time.Second, "socks4.txt", &manager)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	err = utils.LoadFromFile(proxy.SOCKS5, 10*time.Second, "socks5.txt", &manager)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+	}
+
+	if manager.Length() == 0 {
+		os.Exit(69)
 	}
 
 	fmt.Printf("loaded %d proxies", manager.Length())
