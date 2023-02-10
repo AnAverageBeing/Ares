@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -51,7 +52,7 @@ func main() {
 
 	conf := core.NewConfig(*addr, *protocol, &manager, *perDelay, time.Duration(*delay)*time.Second, *loops)
 
-	methd, err := methods.GetMethod(*method, conf)
+	methd, err := methods.GetMethod(strings.TrimSpace(strings.ToLower(*method)), conf)
 	if err != nil {
 		log.Fatal(err)
 	}

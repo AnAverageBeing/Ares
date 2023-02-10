@@ -31,18 +31,18 @@ func (j Join) Start() {
 	j.isRunnig = true
 	done := make(chan struct{})
 	for i := 0; i < j.Config.Loops; i++ {
-		loop(&j, done)
+		j.loop(done)
 	}
 }
 
-func loop(j *Join, done chan struct{}) {
+func (j Join) loop(done chan struct{}) {
 	ticker := time.NewTicker(j.Config.Delay)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
 			for i := 0; i < j.Config.PerDelay; i++ {
-				go connect(j)
+				go j.connect()
 			}
 		case <-done:
 			return
@@ -50,7 +50,7 @@ func loop(j *Join, done chan struct{}) {
 	}
 }
 
-func connect(j *Join) error {
+func (j Join) connect() error {
 	conn, err := minecraft.DialMc(j.Config.Host, j.Config.ProxyManager.GetNext())
 	if err != nil {
 		return err
