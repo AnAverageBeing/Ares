@@ -30,17 +30,21 @@ func (j Join) Start() {
 	j.handshakePacket = mcutils.GetHandshakePacket(ip, iport, j.Config.Version, mcutils.Login)
 	j.isRunnig = true
 	for i := 0; i < j.Config.Loops; i++ {
-		go loop(&j)
+		loop(&j)
 	}
 }
 
 func loop(j *Join) {
+	ticker := time.NewTicker(j.Config.Delay)
 	for j.isRunnig {
-		for i := 0; i < j.Config.PerDelay; i++ {
-			go connect(j)
+		select {
+		case <-ticker.C:
+			for i := 0; i < j.Config.PerDelay; i++ {
+				go connect(j)
+			}
 		}
-		time.Sleep(j.Config.Delay)
 	}
+	ticker.Stop()
 }
 
 func connect(j *Join) error {
