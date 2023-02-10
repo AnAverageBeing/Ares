@@ -6,6 +6,7 @@ import (
 	"Ares/net/proxy"
 	"Ares/utils"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 )
@@ -37,6 +38,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("loaded %d proxies", manager.Length())
 
 	conf := core.NewConfig(*addr, *protocol, &manager, *perDelay, time.Duration(*delay)*time.Second, *loops)
 
