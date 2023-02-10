@@ -11,7 +11,6 @@ import (
 type Protocol string
 
 const (
-	HTTP   = "http"
 	SOCKS4 = "socks4"
 	SOCKS5 = "socks5"
 )
@@ -38,18 +37,14 @@ func (p Proxy) GetString() (key string) {
 	return
 }
 
-func (p Proxy) Dial() func(string) (net.Conn, error) {
+func (p Proxy) Dial() func(string) (conn net.Conn, err error) {
 	switch p.Protocol {
-	case HTTP:
-		return func(s string) (net.Conn, error) {
-			return p.dialHTTP(s)
-		}
 	case SOCKS4:
-		return func(s string) (net.Conn, error) {
+		return func(s string) (conn net.Conn, err error) {
 			return p.dialSOCKS4(s)
 		}
 	case SOCKS5:
-		return func(s string) (net.Conn, error) {
+		return func(s string) (conn net.Conn, err error) {
 			return p.dialSOCKS5(s)
 		}
 	}
@@ -65,8 +60,6 @@ func New(proxyUri string) (*Proxy, error) {
 	proxy := &Proxy{}
 
 	switch uri.Scheme {
-	case "http":
-		proxy.Protocol = HTTP
 	case "socks4":
 		proxy.Protocol = SOCKS4
 	case "socks5":

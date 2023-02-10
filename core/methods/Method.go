@@ -14,9 +14,9 @@ type Method interface {
 func GetMethod(name string, conf *core.AttackConfig) (Method, error) {
 	switch strings.ToLower(name) {
 	case "join":
-		return Join{Config: conf}, nil
+		return &Join{Config: conf}, nil
 	case "ping":
-		return Ping{Config: conf}, nil
+		return &Ping{Config: conf}, nil
 	default:
 		return nil, fmt.Errorf("no method with name %s found", name)
 	}

@@ -29,10 +29,6 @@ func main() {
 	flag.Parse()
 
 	manager := core.ProxyManager{}
-	err = utils.LoadFromFile(proxy.HTTP, 10*time.Second, "http.txt", &manager)
-	if err != nil {
-		fmt.Println(err)
-	}
 
 	err = utils.LoadFromFile(proxy.SOCKS4, 10*time.Second, "socks4.txt", &manager)
 	if err != nil {
@@ -48,7 +44,7 @@ func main() {
 		os.Exit(69)
 	}
 
-	fmt.Printf("loaded %d proxies", manager.Length())
+	fmt.Printf("loaded %d proxies\n", manager.Length())
 
 	conf := core.NewConfig(*addr, *protocol, &manager, *perDelay, time.Duration(*delay)*time.Second, *loops)
 

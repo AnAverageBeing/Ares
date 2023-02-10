@@ -17,7 +17,7 @@ type Ping struct {
 	handshakePacket packet.Packet
 }
 
-func (p Ping) Start() {
+func (p *Ping) Start() {
 	ip, port, err := net.SplitHostPort(p.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -34,7 +34,7 @@ func (p Ping) Start() {
 	}
 }
 
-func (p Ping) loop(done chan struct{}) {
+func (p *Ping) loop(done chan struct{}) {
 	ticker := time.NewTicker(p.Config.Delay)
 	defer ticker.Stop()
 	for {
@@ -49,36 +49,23 @@ func (p Ping) loop(done chan struct{}) {
 	}
 }
 
-func (p Ping) connect() error {
+func (p *Ping) connect() error {
 	conn, err := minecraft.DialMc(p.Config.Host, p.Config.ProxyManager.GetNext())
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
-	err = conn.WritePacket(p.handshakePacket)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	err = conn.WritePacket(packet.Marshal(
+	conn.WritePacket(p.handshakePacket)
+	conn.WritePacket(packet.Marshal(
 		0x00,
 	))
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	err = conn.WritePacket(packet.Marshal(
+	conn.WritePacket(packet.Marshal(
 		0x01,
 		packet.Long(time.Now().Unix()),
 	))
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
 	return nil
 }
 
-func (p Ping) Stop() {
+func (p *Ping) Stop() {
 
 }
