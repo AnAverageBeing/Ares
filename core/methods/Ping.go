@@ -33,9 +33,7 @@ func (p *Ping) Start() {
 
 	done := make(chan struct{})
 
-	for i := 0; i < p.Config.Loops; i++ {
-		go p.loop(done)
-	}
+	p.loop(done)
 }
 
 func (p *Ping) loop(done chan struct{}) {
@@ -68,7 +66,7 @@ func (p *Ping) connect() {
 		packet.Long(time.Now().Unix()),
 	))
 
-	defer conn.Close()
+	conn.Close()
 }
 
 func (p *Ping) Stop() {

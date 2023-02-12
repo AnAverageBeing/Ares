@@ -36,9 +36,7 @@ func (j *Join) Start() {
 
 	done := make(chan struct{})
 
-	for i := 0; i < j.Config.Loops; i++ {
-		go j.loop(done)
-	}
+	j.loop(done)
 }
 
 func (j *Join) loop(done chan struct{}) {
@@ -63,7 +61,7 @@ func (j *Join) connect() {
 	}
 	conn.WritePacket(j.handshakePacket)
 	conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version))
-	defer conn.Close()
+	conn.Close()
 }
 
 func (j *Join) Stop() {
