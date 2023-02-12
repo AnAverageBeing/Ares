@@ -32,3 +32,4 @@ func (manager *ProxyManager) GetNext() *proxy.Proxy {
 	}
 	return manager.proxies[manager.atIndex]
 }
+

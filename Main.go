@@ -14,14 +14,13 @@ import (
 )
 
 var (
-	addr      = flag.String("addr", "0.0.0.0:25565", "Server address")
-	protocol  = flag.Int("protocol", 761, "Server Version Protocol Id")
-	delay     = flag.Int("delay", 1, "Delay between each connection loop")
-	perDelay  = flag.Int("per", 1000, "Connections per Delay")
-	loops     = flag.Int("loops", 1, "Method loops")
-	method    = flag.String("method", "cps", "Method name")
-	duration  = flag.Int("duration", 600, "attack duration")
-	noProxies = flag.Int("nop", 1, "number NO proxy dialer to use")
+	addr     = flag.String("addr", "0.0.0.0:25565", "Server address")
+	protocol = flag.Int("protocol", 761, "Server Version Protocol Id")
+	delay    = flag.Int("delay", 1, "Delay between each connection loop")
+	perDelay = flag.Int("per", 1000, "Connections per Delay")
+	loops    = flag.Int("loops", 1, "Method loops")
+	method   = flag.String("method", "cps", "Method name")
+	duration = flag.Int("duration", 600, "attack duration")
 )
 
 var err error
@@ -39,13 +38,6 @@ func main() {
 	err = utils.LoadFromFile(proxy.SOCKS5, 10*time.Second, "socks5.txt", &manager)
 	if err != nil {
 		fmt.Println(err)
-	}
-	for i := 0; i < *noProxies; i++ {
-		manager.Add(&proxy.Proxy{
-			Protocol: proxy.NOProxy,
-			Host:     utils.RandomName(16),
-			Timeout:  10 * time.Second,
-		})
 	}
 
 	if manager.Length() == 0 {
