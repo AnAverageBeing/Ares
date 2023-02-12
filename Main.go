@@ -46,7 +46,7 @@ func main() {
 
 	fmt.Printf("loaded %d proxies\n", manager.Length())
 
-	conf := core.NewConfig(*addr, *protocol, &manager, *perDelay, time.Duration(*delay)*time.Second, *loops)
+	conf := core.NewConfig(*addr, *protocol, &manager, *perDelay, time.Duration(*delay)*time.Second)
 
 	methd, err := methods.GetMethod(strings.TrimSpace(strings.ToLower(*method)), conf)
 	if err != nil {

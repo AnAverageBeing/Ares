@@ -11,12 +11,11 @@ type AttackConfig struct {
 	ProxyManager *ProxyManager
 	PerDelay     int
 	Delay        time.Duration
-	Loops        int
 }
 
 const DefaultPort = "25565"
 
-func NewConfig(srvAddr string, version int, manager *ProxyManager, perDelay int, delay time.Duration, loops int) (cfg *AttackConfig) {
+func NewConfig(srvAddr string, version int, manager *ProxyManager, perDelay int, delay time.Duration) (cfg *AttackConfig) {
 	addr, port, _ := net.SplitHostPort(srvAddr)
 	if port == "" {
 		port = DefaultPort
@@ -28,7 +27,6 @@ func NewConfig(srvAddr string, version int, manager *ProxyManager, perDelay int,
 		ProxyManager: manager,
 		PerDelay:     perDelay,
 		Delay:        delay,
-		Loops:        loops,
 	}
 
 	return
