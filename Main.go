@@ -20,7 +20,8 @@ var (
 	perDelay = flag.Int("per", 1000, "Connections per Delay")
 	loops    = flag.Int("loops", 1, "Method loops")
 	method   = flag.String("method", "cps", "Method name")
-	duration = flag.Int("duration", 600, "attack duration")
+	duration = flag.Int("duration", 600, "Attack duration")
+	timeout  = flag.Uint("timeout", 5, "Proxy connection timeout")
 )
 
 var err error
@@ -30,12 +31,12 @@ func main() {
 
 	manager := core.ProxyManager{}
 
-	err = utils.LoadFromFile(proxy.SOCKS4, 6*time.Second, "socks4.txt", &manager)
+	err = utils.LoadFromFile(proxy.SOCKS4, time.Duration(*timeout)*time.Second, "socks4.txt", &manager)
 	if err != nil {
 		fmt.Println(err)
 
 	}
-	err = utils.LoadFromFile(proxy.SOCKS5, 6*time.Second, "socks5.txt", &manager)
+	err = utils.LoadFromFile(proxy.SOCKS5, time.Duration(*timeout)*time.Second, "socks5.txt", &manager)
 	if err != nil {
 		fmt.Println(err)
 	}
