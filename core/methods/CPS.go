@@ -36,7 +36,7 @@ func (c *CPS) Start() {
 	done := make(chan struct{})
 
 	for i := 0; i < c.Config.Loops; i++ {
-		c.loop(done)
+		go c.loop(done)
 	}
 }
 

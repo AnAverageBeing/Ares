@@ -34,7 +34,7 @@ func (p *Ping) Start() {
 	done := make(chan struct{})
 
 	for i := 0; i < p.Config.Loops; i++ {
-		p.loop(done)
+		go p.loop(done)
 	}
 }
 

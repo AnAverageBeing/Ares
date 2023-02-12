@@ -37,7 +37,7 @@ func (j *Join) Start() {
 	done := make(chan struct{})
 
 	for i := 0; i < j.Config.Loops; i++ {
-		j.loop(done)
+		go j.loop(done)
 	}
 }
 
