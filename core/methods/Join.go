@@ -7,19 +7,27 @@ import (
 	"Ares/utils"
 	"Ares/utils/mcutils"
 	"fmt"
+	"log"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/panjf2000/ants/v2"
 )
 
 type Join struct {
 	Config          *core.AttackConfig
 	isRunning       bool
 	handshakePacket packet.Packet
+	pool            *ants.Pool
 }
 
 func (j *Join) Start() {
-
+	var err error
+	j.pool, err = ants.NewPool(j.Config.PerDelay, ants.WithPreAlloc(true))
+	if err != nil {
+		log.Fatal(err)
+	}
 	ip, port, err := net.SplitHostPort(j.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -49,7 +57,7 @@ func (j *Join) loop(done chan struct{}) {
 		select {
 		case <-ticker.C:
 			for i := 0; i < j.Config.PerDelay; i++ {
-				go j.connect()
+				j.pool.Submit(j.connect)
 			}
 		case <-done:
 			return

