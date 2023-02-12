@@ -30,12 +30,12 @@ func main() {
 
 	manager := core.ProxyManager{}
 
-	err = utils.LoadFromFile(proxy.SOCKS4, 12*time.Second, "socks4.txt", &manager)
+	err = utils.LoadFromFile(proxy.SOCKS4, 6*time.Second, "socks4.txt", &manager)
 	if err != nil {
 		fmt.Println(err)
 
 	}
-	err = utils.LoadFromFile(proxy.SOCKS5, 12*time.Second, "socks5.txt", &manager)
+	err = utils.LoadFromFile(proxy.SOCKS5, 6*time.Second, "socks5.txt", &manager)
 	if err != nil {
 		fmt.Println(err)
 	}

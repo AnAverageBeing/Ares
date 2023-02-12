@@ -6,27 +6,18 @@ import (
 	"Ares/net/minecraft/packet"
 	"Ares/utils/mcutils"
 	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"time"
-
-	"github.com/panjf2000/ants/v2"
 )
 
 type CPS struct {
 	Config          *core.AttackConfig
 	isRunning       bool
 	handshakePacket packet.Packet
-	pool            *ants.Pool
 }
 
 func (c *CPS) Start() {
-	var err error
-	c.pool, err = ants.NewPool(c.Config.PerDelay, ants.WithPreAlloc(true))
-	if err != nil {
-		log.Fatal(err)
-	}
 	ip, port, err := net.SplitHostPort(c.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -56,7 +47,7 @@ func (c *CPS) loop(done chan struct{}) {
 		select {
 		case <-ticker.C:
 			for i := 0; i < c.Config.PerDelay; i++ {
-				c.pool.Submit(c.connect)
+				go c.connect()
 			}
 		case <-done:
 			return

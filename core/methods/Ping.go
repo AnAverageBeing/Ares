@@ -6,27 +6,18 @@ import (
 	"Ares/net/minecraft/packet"
 	"Ares/utils/mcutils"
 	"fmt"
-	"log"
 	"net"
 	"strconv"
 	"time"
-
-	"github.com/panjf2000/ants/v2"
 )
 
 type Ping struct {
 	Config          *core.AttackConfig
 	isRunning       bool
 	handshakePacket packet.Packet
-	pool            *ants.Pool
 }
 
 func (p *Ping) Start() {
-	var err error
-	p.pool, err = ants.NewPool(p.Config.PerDelay, ants.WithPreAlloc(true))
-	if err != nil {
-		log.Fatal(err)
-	}
 	ip, port, err := net.SplitHostPort(p.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -54,7 +45,7 @@ func (p *Ping) loop(done chan struct{}) {
 		select {
 		case <-ticker.C:
 			for i := 0; i < p.Config.PerDelay; i++ {
-				p.pool.Submit(p.connect)
+				go p.connect()
 			}
 		case <-done:
 			return
