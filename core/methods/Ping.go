@@ -15,9 +15,11 @@ type Ping struct {
 	Config          *core.AttackConfig
 	isRunning       bool
 	handshakePacket packet.Packet
+	connBuffer      chan minecraft.Connection
 }
 
 func (p *Ping) Start() {
+	p.connBuffer = make(chan minecraft.Connection, p.Config.PerDelay)
 	ip, port, err := net.SplitHostPort(p.Config.Host)
 	if err != nil {
 		fmt.Println(err)
@@ -45,6 +47,7 @@ func (p *Ping) loop(done chan struct{}) {
 			for i := 0; i < p.Config.PerDelay; i++ {
 				go p.connect()
 			}
+			go p.closeChannels()
 		case <-done:
 			return
 		}
@@ -66,7 +69,18 @@ func (p *Ping) connect() {
 		packet.Long(time.Now().Unix()),
 	))
 
-	conn.Close()
+	p.connBuffer <- *conn
+}
+
+func (p *Ping) closeChannels() {
+	for i := 0; i < cap(p.connBuffer); i++ {
+		select {
+		case conn := <-p.connBuffer:
+			conn.Close()
+		default:
+			break
+		}
+	}
 }
 
 func (p *Ping) Stop() {
