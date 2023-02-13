@@ -7,9 +7,7 @@ import (
 	"Ares/utils"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -28,29 +26,12 @@ var (
 	timeout  = flag.Uint("timeout", 5, "Proxy connection timeout")
 )
 
-var err error
-
-func init() {
-	flag.StringVar(&key, "key", "", "Product key")
-	flag.StringVar(&user, "user", "", "Username")
-	flag.Parse()
-
-	if key == "" || user == "" {
-		fmt.Printf("Key and user must be specified as command-line arguments.\n")
-		os.Exit(1)
-	}
-
-	if !checkAuth(key, user) {
-		fmt.Printf("Key and user are not valid.\n")
-		os.Exit(1)
-	}
-}
-
 func main() {
+	flag.Parse()
 	fmt.Printf("Starting Ares \nMade by: AverageBeing#5841\n")
 
 	manager := core.ProxyManager{}
-	err = utils.LoadFromFile(proxy.SOCKS4, time.Duration(*timeout)*time.Second, "socks4.txt", &manager)
+	err := utils.LoadFromFile(proxy.SOCKS4, time.Duration(*timeout)*time.Second, "socks4.txt", &manager)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -76,33 +57,4 @@ func main() {
 	fmt.Println("Attack started")
 	time.Sleep(time.Duration(*duration) * time.Second)
 	fmt.Println("Attack ended")
-}
-
-func checkAuth(key, user string) bool {
-	url := fmt.Sprintf("http://catondrugs.wtf:8080/verify?key=%s&user=%s", key, user)
-
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Auth API returned %d StatusCode. Contact AverageBeing#5841 to fix this.", resp.StatusCode)
-		return false
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	if string(body) != "pass" {
-		log.Println("Failed to authenticate")
-		return false
-	}
-
-	return true
 }
