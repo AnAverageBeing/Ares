@@ -28,7 +28,8 @@ var (
 
 func main() {
 	flag.Parse()
-	fmt.Printf("Starting Ares \nMade by: AverageBeing#5841\n")
+	fmt.Printf("░█████╗░██████╗░███████╗░██████╗\n██╔══██╗██╔══██╗██╔════╝██╔════╝\n███████║██████╔╝█████╗░░╚█████╗░\n██╔══██║██╔══██╗██╔══╝░░░╚═══██╗\n██║░░██║██║░░██║███████╗██████╔╝\n╚═╝░░╚═╝╚═╝░░╚═╝╚══════╝╚═════╝░")
+	fmt.Printf("Starting Ares\nMade by AnAverageBeing\n")
 
 	manager := core.ProxyManager{}
 	err := utils.LoadFromFile(proxy.SOCKS4, time.Duration(*timeout)*time.Second, "socks4.txt", &manager)
@@ -44,7 +45,7 @@ func main() {
 		os.Exit(69)
 	}
 
-	fmt.Printf("loaded %d proxies\n", manager.Length())
+	fmt.Printf("Loaded %d proxies\n", manager.Length())
 
 	conf := core.NewConfig(*addr, *protocol, &manager, *perDelay, time.Duration(*delay)*time.Second)
 
